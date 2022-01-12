@@ -1,10 +1,21 @@
-import sys
+# V-Notes, Note taking app using Python and GTK framework.
+#     Copyright (C) 2022  Vega
+#
+#     This program is free software: you can redistribute it and/or modify
+#     it under the terms of the GNU General Public License as published by
+#     the Free Software Foundation, either version 3 of the License, or
+#     (at your option) any later version.
+#
+#     This program is distributed in the hope that it will be useful,
+#     but WITHOUT ANY WARRANTY; without even the implied warranty of
+#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#     GNU General Public License for more details.
+#
+#     You should have received a copy of the GNU General Public License
+#     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import gi
+import gi, sys, mainmenu, editor, dropdown
 from gi.repository import GLib
-
-import editor, dropdown
-import mainmenu
 
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, Gio
@@ -144,6 +155,12 @@ class Application(Gtk.Application):
 
     def on_about(self, action=None, param=None):
         about_dialog = Gtk.AboutDialog(transient_for=self.window, modal=True)
+        about_dialog.set_authors(["Vega D"])
+        about_dialog.set_copyright("©2022, Vega")
+        about_dialog.set_logo_icon_name("preferences-desktop-keyboard-shortcuts-symbolic")
+        about_dialog.set_version("0.1-beta")
+        with open("LICENSE.txt", "r") as license:
+            about_dialog.set_license("".join(license.readlines()))
         about_dialog.present()
 
     def on_quit(self, action, param):
@@ -157,5 +174,6 @@ class Application(Gtk.Application):
 
 if __name__ == "__main__":
     app = Application()
+    GLib.set_application_name("V-Notes")
     app.run(sys.argv)
     Gtk.main()
