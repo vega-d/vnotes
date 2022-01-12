@@ -1,55 +1,153 @@
+import os
+import stat
+
 import gi, fileframework
+
+import conf
 
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, Gio
+from gi.repository.GdkPixbuf import Pixbuf
 
 
 class MainMenu(Gtk.Box):
     def __init__(self, parent):
-        super().__init__()
+        super().__init__(orientation=Gtk.Orientation.HORIZONTAL)
         self.parent = parent
-        vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        new_open_buttons = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
 
         label = Gtk.Label("V-Notes!")
-        vbox.pack_start(label, True, True, 5)
+        new_open_buttons.pack_start(label, True, True, 5)
 
         button = Gtk.Button()
         button_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
-        button_box.pack_start(Gtk.Image.new_from_gicon(Gio.ThemedIcon(name="tab-new-symbolic"), Gtk.IconSize.BUTTON), True, True, 5)
+        button_box.pack_start(Gtk.Image.new_from_gicon(Gio.ThemedIcon(name="tab-new-symbolic"), Gtk.IconSize.BUTTON),
+                              True, True, 5)
         button_box.set_center_widget(Gtk.Label("New Note"))
         button.add(button_box)
         button.connect("clicked", self.on_create_new)
-        vbox.pack_start(button, True, True, 5)
+        new_open_buttons.pack_start(button, True, True, 5)
 
         button = Gtk.Button()
         button_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
-        button_box.pack_start(Gtk.Image.new_from_gicon(Gio.ThemedIcon(name="document-open-symbolic"), Gtk.IconSize.BUTTON), True, True, 5)
+        button_box.pack_start(
+            Gtk.Image.new_from_gicon(Gio.ThemedIcon(name="document-open-symbolic"), Gtk.IconSize.BUTTON), True, True, 5)
         button_box.set_center_widget(Gtk.Label("Open Note"))
         button.add(button_box)
         button.connect("clicked", self.on_open_note)
-        vbox.pack_start(button, True, True, 5)
+        new_open_buttons.pack_start(button, True, True, 5)
 
-        frame = Gtk.Frame()
-        frame.set_label("Recent Files")
-        frame.set_label_align(0.5, 0.5)
+        def populateFileSystemTreeStore(treeStore, path, parent=None):
+            itemCounter = 0
+            # iterate over the items in the path
+            for item in os.listdir(path):
+                # Get the absolute path of the item
+                itemFullname = os.path.join(path, item)
+                # Extract metadata from the item
+                itemMetaData = os.stat(itemFullname)
+                # Determine if the item is a folder
+                itemIsFolder = stat.S_ISDIR(itemMetaData.st_mode)
+                # Generate an icon from the default icon theme
+                itemIcon = Gio.ThemedIcon(name=("folder-symbolic" if itemIsFolder else "empty"))
+                itemIcon = Gtk.Image.new_from_gicon(itemIcon, Gtk.IconSize.BUTTON)
+                itemIcon = itemIcon.get_pixbuf()
 
-        recent_files = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-        for file in fileframework.listfiles()[:4]:
-            button = Gtk.Button()
-            button_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
-            button_box.set_center_widget(Gtk.Label(str(file)[:32]))
-            button.add(button_box)
-            button.props.relief = Gtk.ReliefStyle.NONE
-            button.connect("clicked", self.on_open_note)
-            recent_files.pack_start(button, True, True, 1)
+                # Append the item to the TreeStore
+                currentIter = treeStore.append(parent, [item, itemIcon, itemFullname])
+                # print(currentIter)
+                # add dummy if current item was a folder
+                if itemIsFolder:
+                    treeStore.append(currentIter, [None, None, None])
+                # increment the item counter
+                itemCounter += 1
+            # add the dummy node back if nothing was inserted before
+            if itemCounter < 1: treeStore.append(parent, [None, None, None])
 
-        frame.add(recent_files)
-        vbox.pack_start(frame, True, True, 5)
+        def onRowExpanded(treeView, treeIter, treePath):
+            # get the associated model
+            treeStore = treeView.get_model()
+            # get the full path of the position
+            newPath = treeStore.get_value(treeIter, 2)
+            # populate the subtree on curent position
+            populateFileSystemTreeStore(treeStore, newPath, treeIter)
+            # remove the first child (dummy node)
+            treeStore.remove(treeStore.iter_children(treeIter))
 
-        vbox.set_valign(Gtk.Align.CENTER)
-        vbox.set_halign(Gtk.Align.CENTER)
+        def onRowCollapsed(treeView, treeIter, treePath):
+            # get the associated model
+            treeStore = treeView.get_model()
+            # get the iterator of the first child
+            currentChildIter = treeStore.iter_children(treeIter)
+            # loop as long as some childern exist
+            while currentChildIter:
+                # remove the first child
+                treeStore.remove(currentChildIter)
+                # refresh the iterator of the next child
+                currentChildIter = treeStore.iter_children(treeIter)
+            # append dummy node
+            treeStore.append(treeIter, [None, None, None])
 
-        self.pack_start(vbox, True, True, 0)
+        def onRowActivated(treeView, treePath, treeViewCommon):
+            model = treeView.get_model()
+            path = treePath.to_string()
+            iter = model.get_iter(path)
+            filename = model.get_value(iter, 2)
+
+            itemMetaData = os.stat(filename)
+            # Determine if the item is a folder
+            itemIsFolder = stat.S_ISDIR(itemMetaData.st_mode)
+            if itemIsFolder:
+                unfolded = model.iter_children(iter)
+                if unfolded:
+                    unfolded = bool(model.get_value(unfolded, 2))
+                if unfolded:
+                    onRowCollapsed(treeView, iter, treePath)
+                    # treeView.(treePath)
+                else:
+                    onRowExpanded(treeView, iter, treePath)
+                    treeView.expand_to_path(treePath)
+            else:
+                self.on_open_note(filename)
+
+        # initialize the filesystem treestore
+        fileSystemTreeStore = Gtk.TreeStore(str, Pixbuf, str)
+        # populate the tree store
+        populateFileSystemTreeStore(fileSystemTreeStore, conf.get_default_folder())
+        # initialize the TreeView
+        fileSystemTreeView = Gtk.TreeView(fileSystemTreeStore)
+
+        # Create a TreeViewColumn
+        treeViewCol = Gtk.TreeViewColumn("Notes")
+        # Create a column cell to display text
+        colCellText = Gtk.CellRendererText()
+        # Create a column cell to display an image
+        colCellImg = Gtk.CellRendererPixbuf()
+        # Add the cells to the column
+        treeViewCol.pack_start(colCellImg, False)
+        treeViewCol.pack_start(colCellText, True)
+        # Bind the text cell to column 0 of the tree's model
+        treeViewCol.add_attribute(colCellText, "text", 0)
+        # Bind the image cell to column 1 of the tree's model
+        treeViewCol.add_attribute(colCellImg, "pixbuf", 1)
+        # Append the columns to the TreeView
+        fileSystemTreeView.append_column(treeViewCol)
+        # add "on expand" callback
+        fileSystemTreeView.connect("row-expanded", onRowExpanded)
+        # add "on collapse" callback
+        fileSystemTreeView.connect("row-collapsed", onRowCollapsed)
+        fileSystemTreeView.connect("row-activated", onRowActivated)
+        fileSystemTreeView.set_activate_on_single_click(True)
+        fileSystemTreeView.set_enable_tree_lines(True)
+        scrollView = Gtk.ScrolledWindow()
+        scrollView.add(fileSystemTreeView)
+
+        self.pack_start(scrollView, True, True, 5)
+
+        # self.pack_start(Gtk.Separator(orientation=Gtk.Orientation.VERTICAL), True, True, 5)
+
+        new_open_buttons.set_valign(Gtk.Align.CENTER)
+        new_open_buttons.set_halign(Gtk.Align.CENTER)
+        self.pack_start(new_open_buttons, True, True, 0)
         self.connect("destroy", Gtk.main_quit)
         self.show_all()
 
@@ -59,5 +157,8 @@ class MainMenu(Gtk.Box):
     def on_open_note(self, filename, *args, **kwargs):
         if type(filename) is Gtk.Button:
             filename = filename.get_children()[0].get_center_widget().get_text()
-        print("Opening!", filename)
-        pass # TODO: opening files
+            if filename == "Open Note":
+                filename = None
+        # print("Opening!", filename)
+        text, filename = fileframework.openfile(filename)
+        self.parent.create_tab(text=text, filename=filename)

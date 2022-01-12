@@ -35,11 +35,62 @@ def savebuffer(filename, buffer):
 
     response = dialog.run()
     if response == Gtk.ResponseType.OK:
-        selected_name = dialog.get_filename()
-        print("File selected: ", selected_name)
-    dialog.destroy()
+        path = dialog.get_filename()
+        dialog.destroy()
+    else:
+        dialog.destroy()
+        return False
 
-    print([buffer.get_text(buffer.get_start_iter(), buffer.get_end_iter(), True)])
+    text_to_be_saved = buffer.get_text(buffer.get_start_iter(), buffer.get_end_iter(), True)
+
+    try:
+        with open(path, 'w') as output:
+            output.write(text_to_be_saved)
+    except Exception as e:
+        print("E: Could not save note:", e)
+        return False
+    return True
+
+
+def openfile(filename=None, open_dialog=True):
+    if filename is None and open_dialog:
+        dialog = Gtk.FileChooserDialog(
+            title="Please choose what note to open",
+            action=Gtk.FileChooserAction.OPEN,
+            create_folders=True
+        )
+        dialog.add_buttons(
+            Gtk.STOCK_CANCEL,
+            Gtk.ResponseType.CANCEL,
+            Gtk.STOCK_OPEN,
+            Gtk.ResponseType.OK,
+        )
+        filter = Gtk.FileFilter()
+        filter.add_pattern(".md")
+        filter.set_name(".md notes")
+        # dialog.add_filter(filter)
+
+        response = dialog.run()
+        if response == Gtk.ResponseType.OK:
+            filename = dialog.get_filename()
+            dialog.destroy()
+        else:
+            dialog.destroy()
+            return None, None
+
+    try:
+        file_to_open = open(filename, "r")
+    except Exception as e:
+        file_to_open = None
+        print("E: Could not open file", filename)
+        if open_dialog:
+            return openfile(filename=None)
+        else:
+            return None, None
+
+    text = "".join(file_to_open.readlines())
+    # print([text])
+    return text, filename
 
 
 def mdformat(textbuffer, iters=False):

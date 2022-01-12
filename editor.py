@@ -25,21 +25,23 @@ class SearchDialog(Gtk.Dialog):
         self.show_all()
 
 
-
-
 class Editor(Gtk.Box):
-    def __init__(self, notebook, tab_number):
+    def __init__(self, parent, tab_number, text=None, filename=None):
         super().__init__()
-        self.saved = False
-        self.parent_notebook = notebook
+        self.parent_notebook = parent.notebook
+        self.parent = parent
         self.tab_number = tab_number
         self.set_resize_mode(True)
-
+        self.saved = True
         print("init editor")
         self.grid = Gtk.Grid()
+        self.filename = filename
         self.create_textview()
         self.create_toolbar()
         self.add(self.grid)
+        if text:
+            self.textbuffer.set_text(text)
+            self.saved = True
 
     def create_toolbar(self):
         toolbar = Gtk.Toolbar()
@@ -98,7 +100,7 @@ class Editor(Gtk.Box):
             self.textbuffer.get_iter_at_line(1),
             False)
         buffer = buffer.strip().lstrip("#").strip("_").strip("*")[:64]
-        if len(buffer):
+        if len(buffer) and self.parent_notebook.get_tab_label(self):
             name_label = self.parent_notebook.get_tab_label(self).get_center_widget()
             current_name = name_label.get_text().rstrip(".md")
             if current_name == ("New Note " + str(self.tab_number)) or current_name == buffer[:len(current_name)]:
@@ -109,7 +111,7 @@ class Editor(Gtk.Box):
 
         # clean all formatting
         self.textbuffer.remove_all_tags(self.textbuffer.get_iter_at_line(0),
-        self.textbuffer.get_iter_at_line(self.textbuffer.get_line_count()))
+                                        self.textbuffer.get_iter_at_line(self.textbuffer.get_line_count()))
 
         for i in all_bold_points:
             self.textbuffer.apply_tag(self.tag_bold, i[0], i[1])
@@ -119,7 +121,8 @@ class Editor(Gtk.Box):
             self.textbuffer.apply_tag(self.tag_underline, i[0], i[1])
 
         # marking that file was changing
-        self.saved = False
+        if len(buffer):
+            self.saved = False
 
     def on_button_clicked(self, widget, tag):
         def bounds_calc():
@@ -135,6 +138,7 @@ class Editor(Gtk.Box):
                 end.set_line_offset(end.get_chars_in_line() - 1)
                 bounds = start, end
             return bounds, start, end
+
         bounds, start, end = bounds_calc()
         if tag == self.tag_italic:
             mod = "_"
@@ -143,13 +147,12 @@ class Editor(Gtk.Box):
         if tag == self.tag_underline:
             mod = "__"
 
-        print(bounds)
+        # print(bounds)
         self.textbuffer.insert(start, mod)
         bounds, start, end = bounds_calc()
         start, end = bounds
         self.textbuffer.insert(end, mod)
         self.on_text_change()
-
 
     def on_editable_toggled(self, widget):
         self.textview.set_editable(widget.get_active())
@@ -191,13 +194,36 @@ class Editor(Gtk.Box):
 
     def save(self, filename):
         try:
-            fileframework.savebuffer(filename, self.textbuffer)
-            self.saved = True
-        except Exception:
+            success = fileframework.savebuffer(filename, self.textbuffer)
+            if success:
+                self.saved = True
+        except Exception as e:
             self.saved = False
-            print(Exception)
+            print(e)
 
     def close(self, *args, **kwargs):
-        print("closing!", self.saved)
+        filename = self.parent_notebook.get_tab_label(self).get_center_widget().get_text()
         if self.saved:
             self.destroy()
+        else:
+            dialog = Gtk.MessageDialog(
+                transient_for=self.parent,
+                flags=0,
+                message_type=Gtk.MessageType.ERROR,
+                buttons=Gtk.ButtonsType.NONE,
+                text="Save changes to note " + filename + " before closing?",
+            )
+            dialog.add_buttons(
+                Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+                Gtk.STOCK_DISCARD, Gtk.ResponseType.ACCEPT,
+                Gtk.STOCK_SAVE_AS, Gtk.ResponseType.OK
+            )
+            dialog.format_secondary_text("If you don't save changes made to the file will be permanently lost.")
+            response = dialog.run()
+            if response == Gtk.ResponseType.OK:
+                self.save(filename)
+            elif response == Gtk.ResponseType.ACCEPT:
+                self.destroy()
+            elif response == Gtk.ResponseType.CANCEL:
+                pass
+            dialog.destroy()

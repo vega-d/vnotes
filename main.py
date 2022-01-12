@@ -75,11 +75,15 @@ class Main(Gtk.ApplicationWindow):
         box.add(button)
         hb.pack_start(box)
 
-    def create_tab(self, *args):
+    def create_tab(self, text=None, filename=None, *args):
         tab_number = self.notebook.get_n_pages()
-        tab_name = "New Note " + str(tab_number)
+        if text and filename:
+            filename = filename.split("/")[-1]
+            tab_name = filename
+        else:
+            tab_name = "New Note " + str(tab_number)
 
-        page = editor.Editor(notebook=self.notebook, tab_number=tab_number)
+        page = editor.Editor(self, tab_number=tab_number, text=text, filename=filename)
         page.set_border_width(1)
 
         hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
@@ -93,10 +97,11 @@ class Main(Gtk.ApplicationWindow):
         hbox.pack_end(tab_button, True, True, 3)
 
         hbox.show_all()
-        self.notebook.append_page(page, hbox)
 
+        self.notebook.append_page(page, hbox)
         self.show_all()
         self.notebook.set_current_page(tab_number)
+        # page.on_text_change()
 
     def on_dropdown_click(self, *args, **kwargs):
         pass
