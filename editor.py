@@ -44,7 +44,7 @@ class Editor(Gtk.Box):
         self.add(self.grid)
         if text:
             self.textbuffer.set_text(text)
-            self.saved = True
+            self.on_saved_change(True)
 
     def create_toolbar(self):
         toolbar = Gtk.Toolbar()
@@ -105,9 +105,9 @@ class Editor(Gtk.Box):
         buffer = buffer.strip().lstrip("#").strip("_").strip("*")[:64]
         if len(buffer) and self.parent_notebook.get_tab_label(self):
             name_label = self.parent_notebook.get_tab_label(self).get_center_widget()
-            current_name = name_label.get_text().rstrip(".md")
+            current_name = name_label.get_text().rstrip(".md").rstrip(".txt")
             if current_name == ("New Note " + str(self.tab_number)) or current_name == buffer[:len(current_name)]:
-                name_label.set_text(buffer + ".md")
+                name_label.set_text(buffer + ".txt")
 
         all_bold_points, all_italic_points, all_underline_points = fileframework.mdformat(self.textbuffer, iters=True)
         # print(all_bold_points, all_italic_points, all_underline_points)
@@ -125,7 +125,7 @@ class Editor(Gtk.Box):
 
         # marking that file was changing
         if len(buffer):
-            self.saved = False
+            self.on_saved_change(False)
 
     def on_button_clicked(self, widget, tag):
         def bounds_calc():
@@ -196,13 +196,14 @@ class Editor(Gtk.Box):
             self.search_and_mark(text, match_end)
 
     def save(self, filename):
-        try:
-            success = fileframework.savebuffer(filename, self.textbuffer)
-            if success:
-                self.saved = True
-        except Exception as e:
-            self.saved = False
-            print(e)
+        if not self.saved:
+            try:
+                success = fileframework.savebuffer(filename, self.textbuffer, folder=self.parent.conf.get_default_folder())
+                if success:
+                    self.on_saved_change(True)
+            except Exception as e:
+                self.on_saved_change(False)
+                print(e)
 
     def close(self, *args, **kwargs):
         filename = self.parent_notebook.get_tab_label(self).get_center_widget().get_text()
@@ -230,3 +231,6 @@ class Editor(Gtk.Box):
             elif response == Gtk.ResponseType.CANCEL:
                 pass
             dialog.destroy()
+
+    def on_saved_change(self, saved):
+        self.saved = saved

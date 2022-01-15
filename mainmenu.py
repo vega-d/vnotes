@@ -38,9 +38,14 @@ class MainMenu(Gtk.Box):
         def populateFileSystemTreeStore(treeStore, path, parent=None):
             itemCounter = 0
             # iterate over the items in the path
-            for item in os.listdir(path):
+            fileslist = os.listdir(path)
+            fileslist = [os.path.join(path, f) for f in fileslist]  # add path to each file
+            fileslist.sort(key=lambda x: os.path.getmtime(x))
+            fileslist.reverse()
+            for item in fileslist:
                 # Get the absolute path of the item
-                itemFullname = os.path.join(path, item)
+                itemFullname = item
+                item = item.split("/")[-1]
                 # Extract metadata from the item
                 itemMetaData = os.stat(itemFullname)
                 # Determine if the item is a folder
@@ -110,7 +115,7 @@ class MainMenu(Gtk.Box):
         # initialize the filesystem treestore
         fileSystemTreeStore = Gtk.TreeStore(str, Pixbuf, str)
         # populate the tree store
-        populateFileSystemTreeStore(fileSystemTreeStore, conf.get_default_folder())
+        populateFileSystemTreeStore(fileSystemTreeStore, parent.conf.get_default_folder())
         # initialize the TreeView
         fileSystemTreeView = Gtk.TreeView(fileSystemTreeStore)
 
@@ -158,5 +163,8 @@ class MainMenu(Gtk.Box):
             if filename == "Open Note":
                 filename = None
         # print("Opening!", filename)
-        text, filename = fileframework.openfile(filename)
+        text, filename = fileframework.openfile(filename, folder=self.parent.conf.get_default_folder())
+        print(text, filename)
+        if filename is None:
+            return False
         self.parent.create_tab(text=text, filename=filename)

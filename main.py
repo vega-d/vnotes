@@ -19,6 +19,7 @@ from gi.repository import GLib
 
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, Gio
+import settingsmenu, conf
 
 
 class Main(Gtk.ApplicationWindow):
@@ -26,6 +27,7 @@ class Main(Gtk.ApplicationWindow):
         super().__init__(title="Hello World")
 
         self.parent = application
+        self.conf = conf.confblob()
         self.set_size_request(500, 500)
         # This will be in the windows group and have the "win" prefix
         max_action = Gio.SimpleAction.new_stateful(
@@ -74,14 +76,14 @@ class Main(Gtk.ApplicationWindow):
         button.connect("clicked", self.on_dropdown_click)
         hb.pack_end(button)
 
-        button = Gtk.Button(label="Save")
-        button.connect("clicked", self.on_save_click)
-        hb.pack_end(button)
+        self.save_button = Gtk.Button(label="Save")
+        self.save_button.connect("clicked", self.on_save_click)
+        hb.pack_end(self.save_button)
 
         box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
 
         button = Gtk.Button()
-        button.connect("clicked", self.create_tab)
+        button.connect("clicked", lambda x:self.create_tab())
         button.add(Gtk.Image.new_from_gicon(Gio.ThemedIcon(name="tab-new-symbolic"), Gtk.IconSize.BUTTON))
         box.add(button)
         hb.pack_start(box)
@@ -162,6 +164,21 @@ class Application(Gtk.Application):
         with open("LICENSE.txt", "r") as license:
             about_dialog.set_license("".join(license.readlines()))
         about_dialog.present()
+
+    def on_settings(self, *args):
+        dialog = Gtk.Dialog(
+            transient_for=self.window,
+            flags=0,
+            # message_type=Gtk.MessageType.INFO,
+            # buttons=Gtk.ButtonsType.NONE,
+            title="Preferences",
+        )
+        settings = settingsmenu.Settings(self.window)
+        box = dialog.get_content_area()
+        box.set_border_width(10)
+        box.add(settings)
+        dialog.run()
+        dialog.destroy()
 
     def on_quit(self, action, param):
         self.quit()

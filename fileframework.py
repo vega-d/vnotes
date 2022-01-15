@@ -8,13 +8,10 @@ gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, Pango
 
 
-def listfiles():
-    return ["recent file 1.md", " recent file 2.md"]
-
-
-def savebuffer(filename, buffer):
-    if filename[-3:] != ".md":
-        filename += ".md"
+def savebuffer(filename, buffer, folder=None):
+    print(filename)
+    if filename[-4:] != ".txt":
+        filename += ".txt"
 
     # print("gotta save", filename, buffer)
     dialog = Gtk.FileChooserDialog(
@@ -29,11 +26,15 @@ def savebuffer(filename, buffer):
         Gtk.STOCK_SAVE,
         Gtk.ResponseType.OK,
     )
-    dialog.set_current_name(filename)
+
     filter = Gtk.FileFilter()
-    filter.add_pattern(".md")
-    filter.set_name(".md notes")
+    filter.add_pattern(".txt")
+    filter.set_name(".txt notes")
     dialog.add_filter(filter)
+
+    dialog.set_current_name(filename)
+    if folder:
+        dialog.set_current_folder(folder)
 
     response = dialog.run()
     if response == Gtk.ResponseType.OK:
@@ -54,7 +55,7 @@ def savebuffer(filename, buffer):
     return True
 
 
-def openfile(filename=None, open_dialog=True):
+def openfile(filename=None, open_dialog=True, folder=None):
     if filename is None and open_dialog:
         dialog = Gtk.FileChooserDialog(
             title="Please choose what note to open",
@@ -68,9 +69,10 @@ def openfile(filename=None, open_dialog=True):
             Gtk.ResponseType.OK,
         )
         filter = Gtk.FileFilter()
-        filter.add_pattern(".md")
-        filter.set_name(".md notes")
-        # dialog.add_filter(filter)
+        filter.add_pattern(".txt")
+        filter.set_name(".txt notes")
+        if folder:
+            dialog.set_current_folder(folder)
 
         response = dialog.run()
         if response == Gtk.ResponseType.OK:
@@ -86,7 +88,7 @@ def openfile(filename=None, open_dialog=True):
         file_to_open = None
         print("E: Could not open file", filename)
         if open_dialog:
-            return openfile(filename=None)
+            return openfile(filename=None, folder=folder)
         else:
             return None, None
 

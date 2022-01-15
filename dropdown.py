@@ -14,12 +14,13 @@ class Popover(Gtk.Popover):
 
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
 
-        button = Gtk.ModelButton(label="Item 1")
-        vbox.pack_start(button, True, True, 10)
+        button = Gtk.ModelButton(label="Preferences")
+        button.connect("clicked", parent.parent.on_settings)
+        vbox.pack_start(button, True, True, 5)
 
         button = Gtk.ModelButton(label="About")
         button.connect("clicked", parent.parent.on_about)
-        vbox.pack_start(button, True, True, 10)
+        vbox.pack_start(button, True, True, 5)
 
         vbox.show_all()
         self.add(vbox)
