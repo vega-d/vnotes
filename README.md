@@ -15,7 +15,7 @@ flatpak install vnotes.flatpak
 
 ## Run from source
 
-Install python3, and relevant dependencies if those are missing: `pygobject`, `json` and `stat`. 
+Install python3, and relevant dependencies if those are missing: `pygobject`, `xdg` and `stat`. 
 
 Download source code from the repo using "Code" => "Download as Zip" button above or with this command:
 ```commandline 
