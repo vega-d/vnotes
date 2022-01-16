@@ -133,7 +133,6 @@ class Application(Gtk.Application):
         self.window = None
 
     def do_startup(self):
-        print("Hello World!")
         Gtk.Application.do_startup(self)
         action = Gio.SimpleAction(name="about")
         action.connect("activate", self.on_about)
@@ -147,7 +146,6 @@ class Application(Gtk.Application):
     def do_activate(self):
         # We only allow a single window and raise any existing ones
         if not self.window:
-            print("summoning")
             # Windows are associated with the application
             # when the last one is closed the application shuts down
             self.window = Main(application=self)

@@ -1,7 +1,10 @@
 # Copyright (C) 2022 Vega
 # This program is free software, You should have received a copy of the GNU General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-import json, getpass
+import json, os
+from xdg import xdg_config_home
+configfolder = xdg_config_home().__str__()
+documentsfolder = os.path.join(os.path.expanduser("~"), "Documents")
 
 
 class confblob:
@@ -20,7 +23,7 @@ class confblob:
 
     def update_current(self):
         try:
-            with open("vnotes_conf.json", "r+") as conffile:
+            with open((configfolder + "/vnotes_conf.json"), "r+") as conffile:
                 current_json = json.dumps(self.__dict__)
                 current_from_file_json = "".join(conffile.readlines())
                 if current_json == current_from_file_json:
@@ -43,8 +46,8 @@ class confblob:
         except Exception as e:
             if type(e) == FileNotFoundError:
                 print("looks like conf file doesn't exist, creating one!")  # TODO: create first time setup
-                with open("vnotes_conf.json", "a+") as file:
-                    file.write("""{"default_folder": "/home/""" + getpass.getuser() + """/Documents/", "additional_test_info": "configuration"}""")
+                with open((configfolder + "/vnotes_conf.json"), "a+") as file:
+                    file.write("""{"default_folder": \"""" + documentsfolder + """\", "additional_test_info": "configuration"}""")
                 return self.update_current()
             print("E: Could not save current settings!", e)
             return False

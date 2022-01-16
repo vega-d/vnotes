@@ -58,9 +58,6 @@ class Settings(Gtk.Box):
             print("E: unable to select preferred folder,", e)
             return
 
-    def on_test(self, *args):
-        print(args)
-
 
 class FileChooserButton(Gtk.FileChooserButton):
     def __init__(self):

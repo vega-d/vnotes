@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=Vnotes
+Exec=run.sh
+Type=Application
+Icon=io.github.vegad.vnotes
+Categories=Office

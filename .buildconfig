@@ -1,0 +1,11 @@
+[default]
+name=Default
+runtime=host
+toolchain=default
+config-opts=
+run-opts=
+prefix=/var/home/vega/.var/app/org.gnome.Builder/cache/gnome-builder/install/vnotes/host
+app-id=
+postbuild=
+prebuild=
+default=true
