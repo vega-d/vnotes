@@ -2,8 +2,9 @@
 
 A simple and fast note-taking app for Linux, written in Python with GTK licensed under GPLv3.
 
-[image one]
-[image two]
+![sc1](https://user-images.githubusercontent.com/35414314/149639759-a47ab6c9-5bbc-40cf-ba41-f2a47183d5e5.png)
+![sc2](https://user-images.githubusercontent.com/35414314/149639744-419d55db-f3ae-48e2-9c92-b5b9c535ad82.png)
+
 
 ## Installation
 Download `.flatpak` file from releases page and install it with either graphical software manager you have or
