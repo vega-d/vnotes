@@ -5,6 +5,13 @@ A simple and fast note-taking app for Linux, written in Python with GTK licensed
 [image one]
 [image two]
 
+## Installation
+Download `.flatpak` file from releases page and install it with either graphical software manager you have or
+```commandline
+flatpak install vnotes.flatpak
+```
+
+
 ## Run from source
 
 Install python3, and relevant dependencies if those are missing: `pygobject`, `json` and `stat`. 
