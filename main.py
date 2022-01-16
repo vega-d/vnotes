@@ -111,12 +111,15 @@ class Main(Gtk.ApplicationWindow):
     def create_tab(self, text=None, filename=None, *args):
         tab_number = self.notebook.get_n_pages()
         if text and filename:
+            from copy import copy
+            path = copy(filename)
             filename = filename.split("/")[-1]
             tab_name = filename
         else:
             tab_name = "New Note " + str(tab_number)
+            path = None
 
-        page = editor.Editor(self, tab_number=tab_number, text=text, filename=filename)
+        page = editor.Editor(self, tab_number=tab_number, text=text, filename=filename, path=path)
         page.set_border_width(1)
 
         hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)

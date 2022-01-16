@@ -29,10 +29,11 @@ class SearchDialog(Gtk.Dialog):
 
 
 class Editor(Gtk.Box):
-    def __init__(self, parent, tab_number, text=None, filename=None):
+    def __init__(self, parent, tab_number, text=None, filename=None, path=None):
         super().__init__()
         self.parent_notebook = parent.notebook
         self.parent = parent
+        self.path = path
         self.tab_number = tab_number
         self.set_resize_mode(True)
         self.saved = True
@@ -197,7 +198,7 @@ class Editor(Gtk.Box):
     def save(self, filename):
         if not self.saved:
             try:
-                success = fileframework.savebuffer(filename, self.textbuffer, folder=self.parent.conf.get_default_folder())
+                success = fileframework.savebuffer(filename, self.textbuffer, folder=self.filename)
                 if success:
                     self.on_saved_change(True)
             except Exception as e:
@@ -233,3 +234,7 @@ class Editor(Gtk.Box):
 
     def on_saved_change(self, saved):
         self.saved = saved
+        if self.parent.conf.get_autosave() and self.path.split("/")[-1] == self.filename:
+            import os
+            if os.path.exists(self.path):
+                self.save(filename=self.path)
