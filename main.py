@@ -55,7 +55,11 @@ class Main(Gtk.ApplicationWindow):
         self.show_all()
         # self.create_tab()
 
-        self.add(self.notebook)
+        self.panes = Gtk.Paned()
+        self.panes.pack1(dropdown.NoteBrowser(self), True, False)
+        self.panes.pack2(self.notebook, True, False)
+        self.add(self.panes)
+
         self.show_all()
 
     def on_maximize_toggle(self, action, value):
@@ -81,12 +85,28 @@ class Main(Gtk.ApplicationWindow):
         hb.pack_end(self.save_button)
 
         box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
+        Gtk.StyleContext.add_class(box.get_style_context(), "linked")
+
+        button = Gtk.Button()
+        button.connect("clicked", self.on_left_pane_changed)
+        button.set_image(Gtk.Image.new_from_gicon(Gio.ThemedIcon(name="go-previous-symbolic"), Gtk.IconSize.BUTTON))
+        box.add(button)
 
         button = Gtk.Button()
         button.connect("clicked", lambda x:self.create_tab())
         button.add(Gtk.Image.new_from_gicon(Gio.ThemedIcon(name="tab-new-symbolic"), Gtk.IconSize.BUTTON))
         box.add(button)
+
         hb.pack_start(box)
+
+    def on_left_pane_changed(self, button):
+        pane = self.panes.get_child1()
+        is_visible = pane.get_visible()
+        pane.set_visible(not is_visible)
+        if is_visible:
+            button.set_image(Gtk.Image.new_from_gicon(Gio.ThemedIcon(name="go-next-symbolic"), Gtk.IconSize.BUTTON))
+        else:
+            button.set_image(Gtk.Image.new_from_gicon(Gio.ThemedIcon(name="go-previous-symbolic"), Gtk.IconSize.BUTTON))
 
     def create_tab(self, text=None, filename=None, *args):
         tab_number = self.notebook.get_n_pages()
@@ -158,7 +178,7 @@ class Application(Gtk.Application):
         about_dialog.set_authors(["Vega D"])
         about_dialog.set_copyright("©2022, Vega")
         about_dialog.set_logo_icon_name("preferences-desktop-keyboard-shortcuts-symbolic")
-        about_dialog.set_version("0.1-beta")
+        about_dialog.set_version("0.5-beta")
         with open("LICENSE.txt", "r") as license:
             about_dialog.set_license("".join(license.readlines()))
         about_dialog.present()
