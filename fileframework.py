@@ -11,36 +11,48 @@ from gi.repository import Gtk, Pango
 def savebuffer(filename, buffer, folder=None):
     if filename[-4:] != ".txt":
         filename += ".txt"
+    import os
+    path = os.path.join(folder, filename)
+    if not os.path.exists(path):
+        dialog = Gtk.FileChooserDialog(
+            title="Please choose where to save",
+            action=Gtk.FileChooserAction.SAVE,
+            create_folders=True,
+            do_overwrite_confirmation=True
+        )
+        dialog.add_buttons(
+            Gtk.STOCK_CANCEL,
+            Gtk.ResponseType.CANCEL,
+            Gtk.STOCK_SAVE,
+            Gtk.ResponseType.OK,
+        )
 
-    dialog = Gtk.FileChooserDialog(
-        title="Please choose where to save",
-        action=Gtk.FileChooserAction.SAVE,
-        create_folders=True,
-        do_overwrite_confirmation=True
-    )
-    dialog.add_buttons(
-        Gtk.STOCK_CANCEL,
-        Gtk.ResponseType.CANCEL,
-        Gtk.STOCK_SAVE,
-        Gtk.ResponseType.OK,
-    )
+        filter = Gtk.FileFilter()
+        filter.add_pattern(".txt")
+        filter.set_name(".txt notes")
+        dialog.add_filter(filter)
 
-    filter = Gtk.FileFilter()
-    filter.add_pattern(".txt")
-    filter.set_name(".txt notes")
-    dialog.add_filter(filter)
+        filter = Gtk.FileFilter()
+        filter.add_pattern(".md")
+        filter.set_name(".md notes")
+        dialog.add_filter(filter)
 
-    dialog.set_current_name(filename)
-    if folder:
-        dialog.set_current_folder(folder)
+        filter = Gtk.FileFilter()
+        filter.add_pattern(".*")
+        filter.set_name("All files")
+        dialog.add_filter(filter)
 
-    response = dialog.run()
-    if response == Gtk.ResponseType.OK:
-        path = dialog.get_filename()
-        dialog.destroy()
-    else:
-        dialog.destroy()
-        return False
+        dialog.set_current_name(filename)
+        if folder:
+            dialog.set_current_folder(folder)
+
+        response = dialog.run()
+        if response == Gtk.ResponseType.OK:
+            path = dialog.get_filename()
+            dialog.destroy()
+        else:
+            dialog.destroy()
+            return False
 
     text_to_be_saved = buffer.get_text(buffer.get_start_iter(), buffer.get_end_iter(), True)
 
