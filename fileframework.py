@@ -9,11 +9,9 @@ from gi.repository import Gtk, Pango
 
 
 def savebuffer(filename, buffer, folder=None):
-    print(filename)
     if filename[-4:] != ".txt":
         filename += ".txt"
 
-    # print("gotta save", filename, buffer)
     dialog = Gtk.FileChooserDialog(
         title="Please choose where to save",
         action=Gtk.FileChooserAction.SAVE,
@@ -93,7 +91,6 @@ def openfile(filename=None, open_dialog=True, folder=None):
             return None, None
 
     text = "".join(file_to_open.readlines())
-    # print([text])
     return text, filename
 
 
@@ -135,7 +132,6 @@ def mdformat(textbuffer, iters=False):
             all_italic_points.append(point)
     if len(all_italic_points) % 2 != 0:
         all_italic_points.pop(-1)
-    # print(all_italic_points)
 
     # processing U N D E R L I N E
     all_underline_points = []
@@ -153,7 +149,6 @@ def mdformat(textbuffer, iters=False):
             all_underline_points.append(point)
     if len(all_underline_points) % 2 != 0:
         all_underline_points.pop(-1)
-    # print(all_underline_points)
 
     if iters:
         all_bold_points = [textbuffer.get_iter_at_offset(i) for i in all_bold_points]

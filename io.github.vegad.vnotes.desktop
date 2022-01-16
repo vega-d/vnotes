@@ -2,5 +2,5 @@
 Name=Vnotes
 Exec=run.sh
 Type=Application
-X-Flatpak=io.github.vegad.vnotes
+Icon=io.github.vegad.vnotes
 Categories=Office

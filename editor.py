@@ -36,7 +36,6 @@ class Editor(Gtk.Box):
         self.tab_number = tab_number
         self.set_resize_mode(True)
         self.saved = True
-        print("init editor")
         self.grid = Gtk.Grid()
         self.filename = filename
         self.create_textview()
@@ -110,7 +109,7 @@ class Editor(Gtk.Box):
                 name_label.set_text(buffer + ".txt")
 
         all_bold_points, all_italic_points, all_underline_points = fileframework.mdformat(self.textbuffer, iters=True)
-        # print(all_bold_points, all_italic_points, all_underline_points)
+
 
         # clean all formatting
         self.textbuffer.remove_all_tags(self.textbuffer.get_iter_at_line(0),
@@ -150,7 +149,7 @@ class Editor(Gtk.Box):
         if tag == self.tag_underline:
             mod = "__"
 
-        # print(bounds)
+
         self.textbuffer.insert(start, mod)
         bounds, start, end = bounds_calc()
         start, end = bounds
@@ -203,7 +202,7 @@ class Editor(Gtk.Box):
                     self.on_saved_change(True)
             except Exception as e:
                 self.on_saved_change(False)
-                print(e)
+                print("E: Failed to save, ", e)
 
     def close(self, *args, **kwargs):
         filename = self.parent_notebook.get_tab_label(self).get_center_widget().get_text()

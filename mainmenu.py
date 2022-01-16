@@ -57,7 +57,6 @@ class MainMenu(Gtk.Box):
 
                 # Append the item to the TreeStore
                 currentIter = treeStore.append(parent, [item, itemIcon, itemFullname])
-                # print(currentIter)
                 # add dummy if current item was a folder
                 if itemIsFolder:
                     treeStore.append(currentIter, [None, None, None])
@@ -162,9 +161,9 @@ class MainMenu(Gtk.Box):
             filename = filename.get_children()[0].get_center_widget().get_text()
             if filename == "Open Note":
                 filename = None
-        # print("Opening!", filename)
+
         text, filename = fileframework.openfile(filename, folder=self.parent.conf.get_default_folder())
-        print(text, filename)
+
         if filename is None:
             return False
         self.parent.create_tab(text=text, filename=filename)
