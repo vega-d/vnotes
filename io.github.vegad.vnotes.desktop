@@ -1,0 +1,5 @@
+[Desktop Entry]
+Name=Vnotes
+Exec=run.sh
+Type=Application
+Categories=Office
