@@ -8,4 +8,4 @@ jobs:
     steps:
       - name: List files in the repository
         run: |
-          curl https://raw.githubusercontent.com/dylanaraps/neofetch/master/neofetch | bash
+          tree
