@@ -12,21 +12,35 @@ class Settings(Gtk.Box):
         self.set_size_request(300, 300)
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
 
-        mini_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
+        mini_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         mini_box.pack_start(Gtk.Label("Preferred folder for Notes:"), True, False, 10)
 
+        mini_mini_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
         chooserbutton = Gtk.Button(label="Change")
         chooserbutton.connect("clicked", self.on_preferred_folder_set)
-        mini_box.pack_end(chooserbutton, True, False, 0)
+        mini_mini_box.pack_end(chooserbutton, True, False, 0)
 
         currentfolder = parent.conf.get_default_folder()
         self.entry_folder_current = Gtk.Entry()
         self.entry_folder_current.set_text(currentfolder if currentfolder else "None")
         self.entry_folder_current.set_sensitive(False)
         self.entry_folder_current.set_width_chars(20)
-        mini_box.pack_end(self.entry_folder_current, True, False, 0)
+        mini_mini_box.pack_end(self.entry_folder_current, True, False, 0)
+        mini_box.pack_start(mini_mini_box, False, False, 0)
 
-        box.pack_start(mini_box, False, False, 10)
+        box.pack_start(mini_box, False, True, 10)
+
+        mini_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
+
+        mini_box.pack_end(self.entry_folder_current, True, False, 0)
+        mini_box.pack_start(Gtk.Label("Save in real-time:"), True, False, 10)
+
+        autosaveswitch = Gtk.Switch()
+        autosaveswitch.set_active(parent.conf.get_autosave())
+        autosaveswitch.connect("state_set", self.on_autosave_set)
+        mini_box.pack_end(autosaveswitch, True, False, 0)
+
+        box.pack_start(mini_box, False, True, 10)
 
         # self.set_valign(Gtk.Align.CENTER)
         self.set_halign(Gtk.Align.CENTER)
@@ -57,6 +71,9 @@ class Settings(Gtk.Box):
         except Exception as e:
             print("E: unable to select preferred folder,", e)
             return
+
+    def on_autosave_set(self, switch, state):
+        self.parent.conf.set_autosave(state)
 
 
 class FileChooserButton(Gtk.FileChooserButton):

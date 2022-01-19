@@ -26,3 +26,119 @@ class Popover(Gtk.Popover):
         self.add(vbox)
         self.set_position(Gtk.PositionType.BOTTOM)
 
+
+class NoteBrowser(Gtk.ScrolledWindow):
+    def __init__(self, parent):
+        super(NoteBrowser, self).__init__()
+        self.set_size_request(100, 450)
+        # initialize the filesystem treestore
+        from gi.repository.GdkPixbuf import Pixbuf
+        fileSystemTreeStore = Gtk.TreeStore(str, Pixbuf, str)
+        # populate the tree store
+        self.populateFileSystemTreeStore(fileSystemTreeStore, parent.conf.get_default_folder())
+        # initialize the TreeView
+        fileSystemTreeView = Gtk.TreeView(fileSystemTreeStore)
+
+        # Create a TreeViewColumn
+        treeViewCol = Gtk.TreeViewColumn("Notes")
+        # Create a column cell to display text
+        colCellText = Gtk.CellRendererText()
+        # Create a column cell to display an image
+        colCellImg = Gtk.CellRendererPixbuf()
+        # Add the cells to the column
+        treeViewCol.pack_start(colCellImg, False)
+        treeViewCol.pack_start(colCellText, True)
+        # Bind the text cell to column 0 of the tree's model
+        treeViewCol.add_attribute(colCellText, "text", 0)
+        # Bind the image cell to column 1 of the tree's model
+        treeViewCol.add_attribute(colCellImg, "pixbuf", 1)
+        # Append the columns to the TreeView
+        fileSystemTreeView.append_column(treeViewCol)
+
+        fileSystemTreeView.connect("row-expanded", self.onRowExpanded)
+        fileSystemTreeView.connect("row-collapsed", self.onRowCollapsed)
+        fileSystemTreeView.connect("row-activated", self.onRowActivated)
+
+        fileSystemTreeView.set_activate_on_single_click(True)
+        fileSystemTreeView.set_enable_tree_lines(True)
+
+        scrollView = Gtk.ScrolledWindow()
+        scrollView.add(fileSystemTreeView)
+        self.add(scrollView)
+
+    def populateFileSystemTreeStore(self, treeStore, path, parent=None):
+        itemCounter = 0
+        # iterate over the items in the path
+        import os
+        fileslist = os.listdir(path)
+        fileslist = [os.path.join(path, f) for f in fileslist]  # add path to each file
+        fileslist.sort(key=lambda x: os.path.getmtime(x))
+        fileslist.reverse()
+        for item in fileslist:
+            # Get the absolute path of the item
+            itemFullname = item
+            item = item.split("/")[-1]
+            # Extract metadata from the item
+            itemMetaData = os.stat(itemFullname)
+            # Determine if the item is a folder
+            import stat
+            itemIsFolder = stat.S_ISDIR(itemMetaData.st_mode)
+            # Append the item to the TreeStore
+            currentIter = treeStore.append(parent, [item, None, itemFullname])
+            # add dummy if current item was a folder
+            if itemIsFolder:
+                treeStore.append(currentIter, [None, None, None])
+            # increment the item counter
+            itemCounter += 1
+        # add the dummy node back if nothing was inserted before
+        if itemCounter < 1: treeStore.append(parent, [None, None, None])
+
+    def onRowExpanded(self, treeView, treeIter, treePath):
+        # get the associated model
+        treeStore = treeView.get_model()
+        # get the full path of the position
+        newPath = treeStore.get_value(treeIter, 2)
+        # populate the subtree on curent position
+        self.populateFileSystemTreeStore(treeStore, newPath, treeIter)
+        # remove the first child (dummy node)
+        treeStore.remove(treeStore.iter_children(treeIter))
+
+    def onRowCollapsed(self, treeView, treeIter, treePath):
+        # get the associated model
+        treeStore = treeView.get_model()
+        # get the iterator of the first child
+        currentChildIter = treeStore.iter_children(treeIter)
+        # loop as long as some childern exist
+        while currentChildIter:
+            # remove the first child
+            treeStore.remove(currentChildIter)
+            # refresh the iterator of the next child
+            currentChildIter = treeStore.iter_children(treeIter)
+        # append dummy node
+        treeStore.append(treeIter, [None, None, None])
+
+    def onRowActivated(self, treeView, treePath, treeViewCommon):
+        model = treeView.get_model()
+        path = treePath.to_string()
+        iter = model.get_iter(path)
+        filename = model.get_value(iter, 2)
+
+        import os, stat
+        itemMetaData = os.stat(filename)
+        # Determine if the item is a folder
+        itemIsFolder = stat.S_ISDIR(itemMetaData.st_mode)
+        if itemIsFolder:
+            unfolded = model.iter_children(iter)
+            if unfolded:
+                unfolded = bool(model.get_value(unfolded, 2))
+            if unfolded:
+                self.onRowCollapsed(treeView, iter, treePath)
+                # treeView.(treePath)
+            else:
+                self.onRowExpanded(treeView, iter, treePath)
+                treeView.expand_to_path(treePath)
+        else:
+            notebook = self.get_parent().get_child2()
+            notebook.get_nth_page(0).on_open_note(filename)
+
+

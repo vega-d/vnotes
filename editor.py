@@ -29,10 +29,11 @@ class SearchDialog(Gtk.Dialog):
 
 
 class Editor(Gtk.Box):
-    def __init__(self, parent, tab_number, text=None, filename=None):
+    def __init__(self, parent, tab_number, text=None, filename=None, path=None):
         super().__init__()
         self.parent_notebook = parent.notebook
         self.parent = parent
+        self.path = path
         self.tab_number = tab_number
         self.set_resize_mode(True)
         self.saved = True
@@ -41,6 +42,22 @@ class Editor(Gtk.Box):
         self.create_textview()
         self.create_toolbar()
         self.add(self.grid)
+        self.found = self.textbuffer.create_tag("found", background="yellow")
+        tags_tmp = [
+            self.textbuffer.create_tag("bold", weight=Pango.Weight.BOLD),
+            self.textbuffer.create_tag("italic", style=Pango.Style.ITALIC),
+            self.textbuffer.create_tag("underline", underline=Pango.Underline.SINGLE)
+        ]
+        self.tag_mods = {
+            tags_tmp[0]: "**",
+            tags_tmp[1]: "_",
+            tags_tmp[2]: "__"
+        }
+        self.tags = {
+            "bold": tags_tmp[0],
+            "italic": tags_tmp[1],
+            "underline": tags_tmp[2],
+        }
         if text:
             self.textbuffer.set_text(text)
             self.on_saved_change(True)
@@ -61,9 +78,9 @@ class Editor(Gtk.Box):
         button_underline.set_icon_name("format-text-underline-symbolic")
         toolbar.insert(button_underline, 2)
 
-        button_bold.connect("clicked", self.on_button_clicked, self.tag_bold)
-        button_italic.connect("clicked", self.on_button_clicked, self.tag_italic)
-        button_underline.connect("clicked", self.on_button_clicked, self.tag_underline)
+        button_bold.connect("clicked", self.on_button_clicked, "bold")
+        button_italic.connect("clicked", self.on_button_clicked, "italic")
+        button_underline.connect("clicked", self.on_button_clicked, "underline")
 
         toolbar.insert(Gtk.SeparatorToolItem(), 3)
 
@@ -90,11 +107,6 @@ class Editor(Gtk.Box):
         self.textbuffer.connect('changed', self.on_text_change)
         scrolledwindow.add(self.textview)
 
-        self.tag_bold = self.textbuffer.create_tag("bold", weight=Pango.Weight.BOLD)
-        self.tag_italic = self.textbuffer.create_tag("italic", style=Pango.Style.ITALIC)
-        self.tag_underline = self.textbuffer.create_tag("underline", underline=Pango.Underline.SINGLE)
-        self.tag_found = self.textbuffer.create_tag("found", background="yellow")
-
     def on_text_change(self, *args, **kwargs):
         # apply new name if it's blank or default
         buffer = self.textbuffer.get_text(
@@ -108,25 +120,23 @@ class Editor(Gtk.Box):
             if current_name == ("New Note " + str(self.tab_number)) or current_name == buffer[:len(current_name)]:
                 name_label.set_text(buffer + ".txt")
 
-        all_bold_points, all_italic_points, all_underline_points = fileframework.mdformat(self.textbuffer, iters=True)
-
-
         # clean all formatting
         self.textbuffer.remove_all_tags(self.textbuffer.get_iter_at_line(0),
                                         self.textbuffer.get_iter_at_line(self.textbuffer.get_line_count()))
 
-        for i in all_bold_points:
-            self.textbuffer.apply_tag(self.tag_bold, i[0], i[1])
-        for i in all_italic_points:
-            self.textbuffer.apply_tag(self.tag_italic, i[0], i[1])
-        for i in all_underline_points:
-            self.textbuffer.apply_tag(self.tag_underline, i[0], i[1])
+        # apply new formatting
+        # tags =
+        for kind in ["bold", "italic", "underline", "header1"]:
+            points = fileframework.mdformat(self.textbuffer, iters=True, kind=kind)
+
+            for i in points:
+                self.textbuffer.apply_tag(self.tags[kind], i[0], i[1])
 
         # marking that file was changing
         if len(buffer):
             self.on_saved_change(False)
 
-    def on_button_clicked(self, widget, tag):
+    def on_button_clicked(self, widget, tag_name):
         def bounds_calc():
             bounds = self.textbuffer.get_selection_bounds()
             if len(bounds) != 0:
@@ -142,13 +152,7 @@ class Editor(Gtk.Box):
             return bounds, start, end
 
         bounds, start, end = bounds_calc()
-        if tag == self.tag_italic:
-            mod = "_"
-        if tag == self.tag_bold:
-            mod = "**"
-        if tag == self.tag_underline:
-            mod = "__"
-
+        mod = self.tag_mods[self.tags[tag_name]]
 
         self.textbuffer.insert(start, mod)
         bounds, start, end = bounds_calc()
@@ -197,7 +201,7 @@ class Editor(Gtk.Box):
     def save(self, filename):
         if not self.saved:
             try:
-                success = fileframework.savebuffer(filename, self.textbuffer, folder=self.parent.conf.get_default_folder())
+                success = fileframework.savebuffer(filename, self.textbuffer, folder=self.filename)
                 if success:
                     self.on_saved_change(True)
             except Exception as e:
@@ -233,3 +237,7 @@ class Editor(Gtk.Box):
 
     def on_saved_change(self, saved):
         self.saved = saved
+        if self.parent.conf.get_autosave() and self.path.split("/")[-1] == self.filename:
+            import os
+            if os.path.exists(self.path):
+                self.save(filename=self.path)
