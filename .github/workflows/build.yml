@@ -2,22 +2,12 @@
 
 name: Nightly Flatpak build
 
-# Controls when the action will run. Workflow runs when manually triggered using the UI
-# or API.
-on:
-  push:
-    branches:
-      - main
-      - dev
+workflow "On push" {on = "push" resolves = ["build flatpak"]}
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
-jobs:
-  build:
-    # The type of runner that the job will run on
-    runs-on: ubuntu-latest
+workflow "workflow_dispatch" {on = "workflow_dispatch" resolves = ["build flatpak"]}
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
-    steps:
-    # Runs a single command using the runners shell
-    - name: build flatpak
-      run: ls & pwd
+action "build flatpak" {
+  uses = "fnkr/github-action-git-bash@v1"
+  secrets = ["GITHUB_TOKEN", "SSH_KEY"]
+  args = ["bash", "-c", "flatpak-build.sh"]
+}
