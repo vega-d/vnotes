@@ -8,6 +8,8 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v2
+      - name: try and install flatpak stuff
+        run: sudo apt install flatpak flatpak-builder
       - name: do flatpak
         run: |
-          tree ${{ github.workspace }}
+          bash flatpak_build.sh
