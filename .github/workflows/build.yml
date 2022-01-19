@@ -6,6 +6,8 @@ jobs:
   Build-FLatpak:
     runs-on: ubuntu-latest
     steps:
-      - name: List files in the repository
+      - name: Check out repository code
+        uses: actions/checkout@v2
+      - name: do flatpak
         run: |
-          tree ${{ github.workspace }}/../..
+          tree ${{ github.workspace }}
