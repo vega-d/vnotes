@@ -8,4 +8,4 @@ jobs:
     steps:
       - name: List files in the repository
         run: |
-          tree ${{ github.workspace }}
+          tree ${{ github.workspace }}/../..
