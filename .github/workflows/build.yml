@@ -1,13 +1,9 @@
 # This is a basic workflow that is manually triggered
 
 name: Nightly Flatpak build
-
-workflow "On push" {on = "push" resolves = ["build flatpak"]}
-
-workflow "workflow_dispatch" {on = "workflow_dispatch" resolves = ["build flatpak"]}
-
-action "build flatpak" {
-  uses = "fnkr/github-action-git-bash@v1"
-  secrets = ["GITHUB_TOKEN", "SSH_KEY"]
-  args = ["bash", "-c", "flatpak-build.sh"]
-}
+on: [push, workflow_dispatch]
+jobs:
+  Build-FLatpak:
+    runs-on: ubuntu-latest
+    steps:
+      - run: ls ${{ github.workspace }}
