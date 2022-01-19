@@ -6,4 +6,6 @@ jobs:
   Build-FLatpak:
     runs-on: ubuntu-latest
     steps:
-      - run: ls ${{ github.workspace }}
+      - name: List files in the repository
+        run: |
+          ls ${{ github.workspace }}
