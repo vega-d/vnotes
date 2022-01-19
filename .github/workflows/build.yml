@@ -14,5 +14,9 @@ jobs:
         run: sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
       - name: install flatpak platform
         run: sudo flatpak install -y org.freedesktop.Sdk/x86_64/21.08
+      - name: creating temporary folder
+        run: mkdir repo
       - name: do flatpak
         run: bash flatpak_build.sh
+      - name: removing temporary folder
+        run: sudo rm -rf repo
