@@ -1,0 +1,9 @@
+# This is a basic workflow that is manually triggered
+
+name: Nightly Flatpak build
+on: [push, workflow_dispatch]
+jobs:
+  Build-FLatpak:
+    runs-on: ubuntu-latest
+    steps:
+      - run: ls ${{ github.workspace }}
