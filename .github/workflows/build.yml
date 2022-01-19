@@ -6,4 +6,4 @@ jobs:
   Build-FLatpak:
     runs-on: ubuntu-latest
     steps:
-      - run: ls ${{ github.workspace }}
+      - run: bash -c flatpak_build.sh
