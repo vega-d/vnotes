@@ -31,6 +31,7 @@ class NoteBrowser(Gtk.ScrolledWindow):
     def __init__(self, parent):
         super(NoteBrowser, self).__init__()
         self.set_size_request(100, 450)
+        self.parent = parent
         # initialize the filesystem treestore
         from gi.repository.GdkPixbuf import Pixbuf
         fileSystemTreeStore = Gtk.TreeStore(str, Pixbuf, str)
@@ -70,7 +71,16 @@ class NoteBrowser(Gtk.ScrolledWindow):
         itemCounter = 0
         # iterate over the items in the path
         import os
-        fileslist = os.listdir(path)
+        try:
+            fileslist = os.listdir(path)
+        except FileNotFoundError as e:
+            print("Was unable to load in Notes folder!", e)
+            dialog = Gtk.MessageDialog(transient_for=self.parent, flags=0, message_type=Gtk.MessageType.ERROR, buttons=Gtk.ButtonsType.OK, text="Unable to access preferred Notes folder, please change it in the Settings menu!")
+
+            response = dialog.run()
+            if response == Gtk.ResponseType.OK:
+                dialog.destroy()
+            return
         fileslist = [os.path.join(path, f) for f in fileslist]  # add path to each file
         fileslist.sort(key=lambda x: os.path.getmtime(x))
         fileslist.reverse()

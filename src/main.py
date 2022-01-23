@@ -182,7 +182,7 @@ class Application(Gtk.Application):
         about_dialog.set_copyright("©2022, Vega")
         about_dialog.set_logo_icon_name("preferences-desktop-keyboard-shortcuts-symbolic")
         about_dialog.set_version("0.5-beta")
-        with open("LICENSE.txt", "r") as license:
+        with open("../LICENSE.txt", "r") as license:
             about_dialog.set_license("".join(license.readlines()))
         about_dialog.present()
 
