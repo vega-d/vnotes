@@ -73,6 +73,9 @@ class NoteBrowser(Gtk.ScrolledWindow):
         import os
         try:
             fileslist = os.listdir(path)
+
+            # filter out all dotfiles
+            fileslist = list(filter(lambda x: x[0]!='.', fileslist))
         except FileNotFoundError as e:
             print("Was unable to load in Notes folder!", e)
             dialog = Gtk.MessageDialog(transient_for=self.parent, flags=0, message_type=Gtk.MessageType.ERROR, buttons=Gtk.ButtonsType.OK, text="Unable to access preferred Notes folder, please change it in the Settings menu!")
@@ -81,15 +84,28 @@ class NoteBrowser(Gtk.ScrolledWindow):
             if response == Gtk.ResponseType.OK:
                 dialog.destroy()
             return
+
+        def sorting_key(path):
+            get_mod_time = 0
+            try:
+                get_mod_time = os.path.getmtime(path)
+            except Exception as e:
+                print("W: Could not access", path)
+            return get_mod_time
+
         fileslist = [os.path.join(path, f) for f in fileslist]  # add path to each file
-        fileslist.sort(key=lambda x: os.path.getmtime(x))
+        fileslist.sort(key=sorting_key)
         fileslist.reverse()
         for item in fileslist:
             # Get the absolute path of the item
             itemFullname = item
             item = item.split("/")[-1]
             # Extract metadata from the item
-            itemMetaData = os.stat(itemFullname)
+            try:
+                itemMetaData = os.stat(itemFullname)
+            except FileNotFoundError as e:
+                print("W: could not access", itemFullname)
+                next(iter(fileslist))
             # Determine if the item is a folder
             import stat
             itemIsFolder = stat.S_ISDIR(itemMetaData.st_mode)

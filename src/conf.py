@@ -12,7 +12,6 @@ class confblob:
     def __init__(self):
 
         self.default_folder = None
-        self.additional_test_info = "configuration"
         self.autosave = None
         self.update_current()
 
@@ -62,7 +61,7 @@ class confblob:
                 print("looks like conf file doesn't exist, creating one!")  # TODO: create first time setup
                 with open((configfolder + "/vnotes_conf.json"), "a+") as file:
                     file.write(
-                        """{"default_folder": \"""" + documentsfolder + """\", "additional_test_info": "configuration"}""")
+                        """{"default_folder": \"""" + documentsfolder + """\", "autosave": "false"}""")
                 return self.update_current()
             print("E: Could not save current settings!", e)
             return False
