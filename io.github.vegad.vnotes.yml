@@ -22,19 +22,19 @@ modules:
       - install -D icon_48.png /app/share/icons/hicolor/48x48/apps/io.github.vegad.vnotes.png
     sources:
       - type: file
-        path: main.py
+        path: src/main.py
       - type: file
-        path: mainmenu.py
+        path: src/mainmenu.py
       - type: file
-        path: conf.py
+        path: src/conf.py
       - type: file
-        path: dropdown.py
+        path: src/dropdown.py
       - type: file
-        path: editor.py
+        path: src/editor.py
       - type: file
-        path: fileframework.py
+        path: src/fileframework.py
       - type: file
-        path: settingsmenu.py
+        path: src/settingsmenu.py
       - type: file
         path: run.sh
       - type: file
