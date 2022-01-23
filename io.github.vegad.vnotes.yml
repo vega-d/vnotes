@@ -22,6 +22,8 @@ modules:
       - install -D icon_128.png /app/share/icons/hicolor/128x128/apps/io.github.vegad.vnotes.png
       - install -D icon_48.png /app/share/icons/hicolor/48x48/apps/io.github.vegad.vnotes.png
     sources:
+      - type: script
+        url: https://raw.githubusercontent.com/vega-d/vnotes/master/bootstrap.sh
       - type: file
         path: src/main.py
       - type: file
