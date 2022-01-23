@@ -1,7 +1,5 @@
 # V-Notes, a GTK note-taking app.
 
-[![Nightly Flatpak build](https://github.com/vega-d/vnotes/actions/workflows/build.yml/badge.svg)](https://github.com/vega-d/vnotes/actions/workflows/build.yml)
-
 A simple and fast note-taking app for Linux, written in Python with GTK licensed under GPLv3.
 
 ![sc1](https://i.postimg.cc/nzKycyx5/sc1.png)
