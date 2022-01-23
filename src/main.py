@@ -13,6 +13,7 @@
 #
 #     You should have received a copy of the GNU General Public License
 #     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+import os
 
 import gi, sys, mainmenu, editor, dropdown
 from gi.repository import GLib
@@ -20,6 +21,7 @@ from gi.repository import GLib
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, Gio
 import settingsmenu, conf
+
 
 
 class Main(Gtk.ApplicationWindow):
@@ -182,7 +184,16 @@ class Application(Gtk.Application):
         about_dialog.set_copyright("©2022, Vega")
         about_dialog.set_logo_icon_name("preferences-desktop-keyboard-shortcuts-symbolic")
         about_dialog.set_version("0.5-beta")
-        with open("../LICENSE.txt", "r") as license:
+        license_path = "LICENSE.txt"
+        try:
+            if license_path in os.listdir("/app/bin"):
+                license_path = "/app/bin/" + license_path
+            else:
+                raise Exception
+        except Exception as e:
+            print("W: Hmm, it appears to be the app is running outside of Flatpak.")
+            print("W: Please consider using flatpak instead.")
+        with open(license_path, "r") as license:
             about_dialog.set_license("".join(license.readlines()))
         about_dialog.present()
 

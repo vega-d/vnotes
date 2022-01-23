@@ -5,14 +5,13 @@ mkdir repo
 flatpak-builder build io.github.vegad.vnotes.yml --force-clean --repo=repo
 flatpak build-bundle repo vnotes.flatpak io.github.vegad.vnotes
 
-while test $# -gt 0
-  do
-      case "$1" in
-      (-i|--install)
-          shift
-          flatpak remove --force-remove --delete-data --noninteractive -y vnotes
-          flatpak-builder --user --install --force-clean build io.github.vegad.vnotes.yml
-          shift;;
-      (*) usage;;
-      esac
-  done
+if [ "$1" = "-i" ] || [ "$1" = "--install" ]
+then
+  flatpak remove --force-remove --delete-data --noninteractive -y vnotes
+  flatpak-builder --user --install --force-clean build "io.github.vegad.vnotes.yml"
+fi
+
+if [ "$2" = "-r" ] || [ "$2" = "--run" ]
+then
+  flatpak run io.github.vegad.vnotes
+fi

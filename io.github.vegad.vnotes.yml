@@ -15,6 +15,7 @@ modules:
       - install -D editor.py /app/bin/editor.py
       - install -D fileframework.py /app/bin/fileframework.py
       - install -D settingsmenu.py /app/bin/settingsmenu.py
+      - install -D LICENSE.txt /app/bin/LICENSE.txt
       - install -D io.github.vegad.vnotes.desktop /app/share/applications/io.github.vegad.vnotes.desktop
       - install -D io.github.vegad.vnotes.appdata.xml /app/share/metainfo/io.github.vegad.vnotes.appdata.xml
       - install -D icon.svg /app/share/icons/hicolor/svg/apps/io.github.vegad.vnotes.svg
@@ -36,7 +37,7 @@ modules:
       - type: file
         path: src/settingsmenu.py
       - type: file
-        path: run.sh
+        path: src/run.sh
       - type: file
         path: io.github.vegad.vnotes.desktop
       - type: file
@@ -47,6 +48,8 @@ modules:
         path: icons/icon_48.png
       - type: file
         path: icons/icon_128.png
+      - type: file
+        path: LICENSE.txt
   - python3-requirements.json
 finish-args:
   # X11 + XShm access
