@@ -13,20 +13,19 @@
 #
 #     You should have received a copy of the GNU General Public License
 #     along with this program.  If not, see <https://www.gnu.org/licenses/>.
-import os
-
-import gi, sys, mainmenu, editor, dropdown
+import gi
 from gi.repository import GLib
 
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, Gio
-import settingsmenu, conf
 
+import os, sys
+import settingsmenu, conf, mainmenu, editor, dropdown
 
 
 class Main(Gtk.ApplicationWindow):
     def __init__(self, application, title="Main Window"):
-        super().__init__(title="Hello World")
+        super().__init__()
 
         self.parent = application
         self.conf = conf.confblob()
@@ -95,7 +94,7 @@ class Main(Gtk.ApplicationWindow):
         box.add(button)
 
         button = Gtk.Button()
-        button.connect("clicked", lambda x:self.create_tab())
+        button.connect("clicked", lambda x: self.create_tab())
         button.add(Gtk.Image.new_from_gicon(Gio.ThemedIcon(name="tab-new-symbolic"), Gtk.IconSize.BUTTON))
         box.add(button)
 
@@ -154,7 +153,7 @@ class Main(Gtk.ApplicationWindow):
 
 class Application(Gtk.Application):
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, application_id="com.example.vnotes", **kwargs)
+        super().__init__(*args, **kwargs)
         self.window = None
 
     def do_startup(self):
@@ -183,7 +182,7 @@ class Application(Gtk.Application):
         about_dialog.set_authors(["Vega D"])
         about_dialog.set_copyright("©2022, Vega")
         about_dialog.set_logo_icon_name("preferences-desktop-keyboard-shortcuts-symbolic")
-        about_dialog.set_version("0.5-beta")
+        about_dialog.set_version("1.0-beta")
         license_path = "LICENSE.txt"
         try:
             if license_path in os.listdir("/app/bin"):

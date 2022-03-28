@@ -86,7 +86,8 @@ class Editor(Gtk.Box):
 
         button_wrap = Gtk.ToolButton()
         button_wrap.set_icon_name("format-indent-less-symbolic")
-        button_wrap.connect("clicked", self.on_wrap_toggled, )
+        button_wrap.connect("clicked", self.on_wrap_toggled)
+        self.on_wrap_toggled(button_wrap)
         toolbar.insert(button_wrap, 11)
 
         toolbar.insert(Gtk.SeparatorToolItem(), 8)
