@@ -169,5 +169,5 @@ def get_points_underline(text):
 
 
 def get_points_header1(text):
-    print([text])
+    # print([text])
     return []
