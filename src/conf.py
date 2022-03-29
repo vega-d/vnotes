@@ -1,11 +1,14 @@
 # Copyright (C) 2022 Vega
 # This program is free software, You should have received a copy of the GNU General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-import json, os
-from xdg import xdg_config_home
+import json, os, subprocess
 
-configfolder = xdg_config_home().__str__()
-documentsfolder = os.path.join(os.path.expanduser("~"), "Documents")
+configfolder = os.environ.get("XDG_CONFIG_HOME")
+
+try:
+    documentsfolder = subprocess.check_output(["xdg-user-dir", "DOCUMENTS"], universal_newlines=True).strip()
+except:
+    documentsfolder = os.path.join(os.path.expanduser("~"), "Documents")
 
 
 class confblob:
