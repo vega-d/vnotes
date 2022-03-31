@@ -109,12 +109,15 @@ class Editor(Gtk.Box):
         scrolledwindow.add(self.textview)
 
     def on_text_change(self, *args, **kwargs):
+        if self.textbuffer.get_char_count():
+            return
         # apply new name if it's blank or default
         buffer = self.textbuffer.get_text(
             self.textbuffer.get_iter_at_line(0),
             self.textbuffer.get_iter_at_line(1),
             False)
         buffer = buffer.strip().lstrip("#").strip("_").strip("*")[:64]
+
         if len(buffer) and self.parent_notebook.get_tab_label(self):
             name_label = self.parent_notebook.get_tab_label(self).get_center_widget()
             current_name = name_label.get_text().rstrip(".md").rstrip(".txt")
@@ -151,6 +154,9 @@ class Editor(Gtk.Box):
                 end.set_line_offset(end.get_chars_in_line() - 1)
                 bounds = start, end
             return bounds, start, end
+        print(self.textbuffer.get_char_count())
+        if not self.textbuffer.get_char_count():
+            return
 
         bounds, start, end = bounds_calc()
         mod = self.tag_mods[self.tags[tag_name]]

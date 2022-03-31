@@ -8,6 +8,19 @@ gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, Pango
 
 
+def flaware_path(filename):
+    try:
+        import os
+        if filename in os.listdir("/app/bin"):
+            filename = "/app/bin/" + filename
+        else:
+            raise Exception
+    except Exception as e:
+        print("W: Hmm, it appears to be the app is running outside of Flatpak.")
+        print("W: Please consider using flatpak instead.")
+    return filename
+
+
 def savebuffer(filename, buffer, folder=None):
     if filename[-4:] != ".txt":
         filename += ".txt"
