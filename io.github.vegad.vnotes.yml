@@ -1,4 +1,4 @@
-app-id: io.github.vegad.vnotes
+app-id: io.github.vegad.vnotes_beta
 runtime: org.gnome.Platform
 runtime-version: '42'
 sdk: org.gnome.Platform
@@ -21,6 +21,7 @@ modules:
       - install -D run.sh /app/bin/run.sh
       - install -D main.py /app/bin/main.py
       - install -D mainmenu.py /app/bin/mainmenu.py
+      - install -D buildinfo.py /app/bin/buildinfo.py
       - install -D conf.py /app/bin/conf.py
       - install -D dropdown.py /app/bin/dropdown.py
       - install -D editor.py /app/bin/editor.py
@@ -47,6 +48,8 @@ modules:
         path: src/fileframework.py
       - type: file
         path: src/settingsmenu.py
+      - type: file
+        path: src/buildinfo.py
       - type: file
         path: src/run.sh
       - type: file
