@@ -1,5 +1,9 @@
 # V-Notes, a GTK note-taking app.
 
+
+
+[<img alt="alt_text" height="100px" src="https://www.flathub.org/assets/badges/flathub-badge-en.png" />](https://flathub.org/apps/details/io.github.vegad.vnotes)
+
 A simple and fast note-taking app for Linux, written in Python with GTK licensed under GPLv3.
 
 ![sc1](https://i.postimg.cc/nzKycyx5/sc1.png)
