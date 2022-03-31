@@ -20,7 +20,7 @@ gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, Gio
 
 import os, sys
-import settingsmenu, conf, mainmenu, editor, dropdown
+import settingsmenu, conf, mainmenu, editor, dropdown, fileframework, buildinfo
 
 
 class Main(Gtk.ApplicationWindow):
@@ -181,17 +181,11 @@ class Application(Gtk.Application):
         about_dialog = Gtk.AboutDialog(transient_for=self.window, modal=True)
         about_dialog.set_authors(["Vega D"])
         about_dialog.set_copyright("©2022, Vega")
-        about_dialog.set_logo_icon_name("preferences-desktop-keyboard-shortcuts-symbolic")
-        about_dialog.set_version("1.0-beta")
-        license_path = "LICENSE.txt"
-        try:
-            if license_path in os.listdir("/app/bin"):
-                license_path = "/app/bin/" + license_path
-            else:
-                raise Exception
-        except Exception as e:
-            print("W: Hmm, it appears to be the app is running outside of Flatpak.")
-            print("W: Please consider using flatpak instead.")
+        about_dialog.set_version(buildinfo.version)
+        about_dialog.set_website("https://github.com/vega-d/vnotes/")
+
+        license_path = fileframework.flaware_path("LICENSE.txt")
+
         with open(license_path, "r") as license:
             about_dialog.set_license("".join(license.readlines()))
         about_dialog.present()
@@ -215,13 +209,8 @@ class Application(Gtk.Application):
         self.quit()
 
 
-# win = Main()
-# win.connect("destroy", Gtk.main_quit)
-# win.show_all()
-# Gtk.main()
-
 if __name__ == "__main__":
     app = Application()
-    GLib.set_application_name("V-Notes")
+    GLib.set_application_name(buildinfo.application_name)
     app.run(sys.argv)
     Gtk.main()
