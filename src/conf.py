@@ -10,12 +10,14 @@ try:
 except:
     documentsfolder = os.path.join(os.path.expanduser("~"), "Documents")
 
+print("config folder is:", configfolder)
 
 class confblob:
     def __init__(self):
 
         self.default_folder = None
         self.autosave = None
+        self.debug = None
         self.update_current()
 
     def get_default_folder(self):
@@ -30,6 +32,16 @@ class confblob:
 
     def set_autosave(self, autosave):
         self.autosave = autosave
+        return self.update_current()
+
+    def get_debug(self):
+        return self.debug
+
+    def set_debug(self, debug):
+        if debug is None:
+            self.debug = not self.debug
+        else:
+            self.debug = debug
         return self.update_current()
 
     def update_current(self):
@@ -64,7 +76,7 @@ class confblob:
                 print("looks like conf file doesn't exist, creating one!")  # TODO: create first time setup
                 with open((configfolder + "/vnotes_conf.json"), "a+") as file:
                     file.write(
-                        """{"default_folder": \"""" + documentsfolder + """\", "autosave": "false"}""")
+                        """{"default_folder": \"""" + documentsfolder + """\", "autosave": "false", "debug": "false"}""")
                 return self.update_current()
             print("E: Could not save current settings!", e)
             return False

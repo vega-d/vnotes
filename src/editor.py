@@ -109,7 +109,7 @@ class Editor(Gtk.Box):
         scrolledwindow.add(self.textview)
 
     def on_text_change(self, *args, **kwargs):
-        if self.textbuffer.get_char_count():
+        if self.textbuffer.get_char_count() == 0:
             return
         # apply new name if it's blank or default
         buffer = self.textbuffer.get_text(
@@ -124,6 +124,7 @@ class Editor(Gtk.Box):
             if current_name == ("New Note " + str(self.tab_number)) or current_name == buffer[:len(current_name)]:
                 name_label.set_text(buffer + ".txt")
 
+        print("current tab name is:", self.parent_notebook.get_tab_label(self))
         # clean all formatting
         self.textbuffer.remove_all_tags(self.textbuffer.get_iter_at_line(0),
                                         self.textbuffer.get_iter_at_line(self.textbuffer.get_line_count()))
@@ -141,6 +142,7 @@ class Editor(Gtk.Box):
             self.on_saved_change(False)
 
     def on_button_clicked(self, widget, tag_name):
+        print("button pressed, widget:", widget)
         def bounds_calc():
             bounds = self.textbuffer.get_selection_bounds()
             if len(bounds) != 0:
@@ -243,6 +245,9 @@ class Editor(Gtk.Box):
             dialog.destroy()
 
     def on_saved_change(self, saved):
+        if self.filename is None:
+            # self.saved = False
+            return
         self.saved = saved
         if self.parent.conf.get_autosave() and self.path.split("/")[-1] == self.filename:
             import os
