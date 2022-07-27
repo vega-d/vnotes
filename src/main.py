@@ -56,8 +56,10 @@ class Main(Gtk.ApplicationWindow):
         self.show_all()
         # self.create_tab()
 
+        self.noteBrowser = dropdown.NoteBrowser(self)
+
         self.panes = Gtk.Paned()
-        self.panes.pack1(dropdown.NoteBrowser(self), True, False)
+        self.panes.pack1(self.noteBrowser, True, False)
         self.panes.pack2(self.notebook, True, False)
         self.add(self.panes)
 
@@ -149,6 +151,7 @@ class Main(Gtk.ApplicationWindow):
         if type(current_editor) is not mainmenu.MainMenu:
             filename = self.notebook.get_tab_label(current_editor).get_center_widget().get_text()
             current_editor.save(filename)
+            self.noteBrowser.update()
 
 
 class Application(Gtk.Application):

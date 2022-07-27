@@ -124,7 +124,7 @@ class Editor(Gtk.Box):
             if current_name == ("New Note " + str(self.tab_number)) or current_name == buffer[:len(current_name)]:
                 name_label.set_text(buffer + ".txt")
 
-        print("current tab name is:", self.parent_notebook.get_tab_label(self))
+        # print("current tab name is:", self.parent_notebook.get_tab_label(self))
         # clean all formatting
         self.textbuffer.remove_all_tags(self.textbuffer.get_iter_at_line(0),
                                         self.textbuffer.get_iter_at_line(self.textbuffer.get_line_count()))
