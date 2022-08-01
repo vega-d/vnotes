@@ -38,7 +38,7 @@ class NoteBrowser(Gtk.ScrolledWindow):
         # populate the tree store
         self.populateFileSystemTreeStore(fileSystemTreeStore, parent.conf.get_default_folder())
         # initialize the TreeView
-        fileSystemTreeView = Gtk.TreeView(fileSystemTreeStore)
+        self.fileSystemTreeView = Gtk.TreeView(fileSystemTreeStore)
 
         # Create a TreeViewColumn
         treeViewCol = Gtk.TreeViewColumn("Notes")
@@ -54,17 +54,17 @@ class NoteBrowser(Gtk.ScrolledWindow):
         # Bind the image cell to column 1 of the tree's model
         treeViewCol.add_attribute(colCellImg, "pixbuf", 1)
         # Append the columns to the TreeView
-        fileSystemTreeView.append_column(treeViewCol)
+        self.fileSystemTreeView.append_column(treeViewCol)
 
-        fileSystemTreeView.connect("row-expanded", self.onRowExpanded)
-        fileSystemTreeView.connect("row-collapsed", self.onRowCollapsed)
-        fileSystemTreeView.connect("row-activated", self.onRowActivated)
+        self.fileSystemTreeView.connect("row-expanded", self.onRowExpanded)
+        self.fileSystemTreeView.connect("row-collapsed", self.onRowCollapsed)
+        self.fileSystemTreeView.connect("row-activated", self.onRowActivated)
 
-        fileSystemTreeView.set_activate_on_single_click(True)
-        fileSystemTreeView.set_enable_tree_lines(True)
+        self.fileSystemTreeView.set_activate_on_single_click(True)
+        self.fileSystemTreeView.set_enable_tree_lines(True)
 
         scrollView = Gtk.ScrolledWindow()
-        scrollView.add(fileSystemTreeView)
+        scrollView.add(self.fileSystemTreeView)
         self.add(scrollView)
 
     def populateFileSystemTreeStore(self, treeStore, path, parent=None):
@@ -124,7 +124,7 @@ class NoteBrowser(Gtk.ScrolledWindow):
         treeStore = treeView.get_model()
         # get the full path of the position
         newPath = treeStore.get_value(treeIter, 2)
-        # populate the subtree on curent position
+        # populate the subtree on current position
         self.populateFileSystemTreeStore(treeStore, newPath, treeIter)
         # remove the first child (dummy node)
         treeStore.remove(treeStore.iter_children(treeIter))
@@ -146,6 +146,7 @@ class NoteBrowser(Gtk.ScrolledWindow):
     def onRowActivated(self, treeView, treePath, treeViewCommon):
         model = treeView.get_model()
         path = treePath.to_string()
+        print(path)
         iter = model.get_iter(path)
         filename = model.get_value(iter, 2)
 
@@ -154,17 +155,28 @@ class NoteBrowser(Gtk.ScrolledWindow):
         # Determine if the item is a folder
         itemIsFolder = stat.S_ISDIR(itemMetaData.st_mode)
         if itemIsFolder:
-            unfolded = model.iter_children(iter)
-            if unfolded:
-                unfolded = bool(model.get_value(unfolded, 2))
-            if unfolded:
-                self.onRowCollapsed(treeView, iter, treePath)
-                # treeView.(treePath)
-            else:
-                self.onRowExpanded(treeView, iter, treePath)
-                treeView.expand_to_path(treePath)
+            treeItem = model.iter_children(iter)
+            if treeItem:
+                is_unfolded = bool(model.get_value(treeItem, 2))
+                if is_unfolded:
+                    self.onRowCollapsed(treeView, iter, treePath)
+                    # treeView.(treePath)
+                else:
+                    self.onRowExpanded(treeView, iter, treePath)
+                    treeView.expand_to_path(treePath)
         else:
             notebook = self.get_parent().get_child2()
             notebook.get_nth_page(0).on_open_note(filename)
 
+    def update(self):
+        return False ## honestly I don't know how this can even remotely work
+        TreeStore = self.fileSystemTreeView.get_model()
 
+        def clean(TreeStore, TreePath, TreeIter):
+            with TreeStore.iter_parent(TreeIter) as parent:
+                if parent is not None:
+                    TreeIter = parent
+            TreeStore.remove(TreeIter)
+            return False
+        TreeStore.foreach(clean)
+        # self.populateFileSystemTreeStore(TreeStore, self.parent.conf.get_default_folder(), None)
