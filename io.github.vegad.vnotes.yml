@@ -1,0 +1,66 @@
+app-id: io.github.vegad.vnotes_beta
+runtime: org.gnome.Platform
+runtime-version: '42'
+sdk: org.gnome.Platform
+command: run.sh
+
+finish-args:
+  # X11 + XShm access
+  - --socket=fallback-x11
+  - --share=ipc
+  # Wayland access
+  - --socket=wayland
+  # Needs to save files locally
+  - --filesystem=xdg-documents
+  - --filesystem=~/Nextcloud/Notes
+
+modules:
+  - name: vnotes
+    buildsystem: simple
+    build-commands:
+      - install -D run.sh /app/bin/run.sh
+      - install -D main.py /app/bin/main.py
+      - install -D mainmenu.py /app/bin/mainmenu.py
+      - install -D buildinfo.py /app/bin/buildinfo.py
+      - install -D conf.py /app/bin/conf.py
+      - install -D dropdown.py /app/bin/dropdown.py
+      - install -D editor.py /app/bin/editor.py
+      - install -D fileframework.py /app/bin/fileframework.py
+      - install -D settingsmenu.py /app/bin/settingsmenu.py
+      - install -D LICENSE.txt /app/bin/LICENSE.txt
+      - install -D io.github.vegad.vnotes.desktop /app/share/applications/io.github.vegad.vnotes.desktop
+      - install -D io.github.vegad.vnotes.appdata.xml /app/share/metainfo/io.github.vegad.vnotes.appdata.xml
+      - install -D icon.svg /app/share/icons/hicolor/svg/apps/io.github.vegad.vnotes.svg
+      - install -D icon_128.png /app/share/icons/hicolor/128x128/apps/io.github.vegad.vnotes.png
+      - install -D icon_48.png /app/share/icons/hicolor/48x48/apps/io.github.vegad.vnotes.png
+    sources:
+      - type: file
+        path: src/main.py
+      - type: file
+        path: src/mainmenu.py
+      - type: file
+        path: src/conf.py
+      - type: file
+        path: src/dropdown.py
+      - type: file
+        path: src/editor.py
+      - type: file
+        path: src/fileframework.py
+      - type: file
+        path: src/settingsmenu.py
+      - type: file
+        path: src/buildinfo.py
+      - type: file
+        path: src/run.sh
+      - type: file
+        path: io.github.vegad.vnotes.desktop
+      - type: file
+        path: io.github.vegad.vnotes.appdata.xml
+      - type: file
+        path: icons/icon.svg
+      - type: file
+        path: icons/icon_48.png
+      - type: file
+        path: icons/icon_128.png
+      - type: file
+        path: LICENSE.txt
