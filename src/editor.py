@@ -113,11 +113,11 @@ class Editor(Gtk.Box):
             return
         # apply new name if it's blank or default
         buffer = self.textbuffer.get_text(
-            self.textbuffer.get_iter_at_line(0),
-            self.textbuffer.get_iter_at_line(1),
-            False)
+            *self.textbuffer.get_bounds(),
+            False)[:min(30, self.textbuffer.get_char_count())]
         buffer = buffer.strip().lstrip("#").strip("_").strip("*")[:64]
 
+        # here we figure out the default tab name
         if len(buffer) and self.parent_notebook.get_tab_label(self):
             name_label = self.parent_notebook.get_tab_label(self).get_center_widget()
             current_name = name_label.get_text().rstrip(".md").rstrip(".txt")
@@ -142,11 +142,14 @@ class Editor(Gtk.Box):
             self.on_saved_change(False)
 
     def on_button_clicked(self, widget, tag_name):
-        print("button pressed, widget:", widget)
+        # print("button pressed, widget:", widget)
         def bounds_calc():
             bounds = self.textbuffer.get_selection_bounds()
+
+            # if there's a sekection
             if len(bounds) != 0:
                 start, end = bounds
+            # automatic word detection if there's no selection
             else:
                 cursor = self.textbuffer.props.cursor_position
                 cursor = self.textbuffer.get_iter_at_offset(cursor)
@@ -246,7 +249,7 @@ class Editor(Gtk.Box):
 
     def on_saved_change(self, saved):
         if self.filename is None:
-            # self.saved = False
+            self.saved = False
             return
         self.saved = saved
         if self.parent.conf.get_autosave() and self.path.split("/")[-1] == self.filename:
