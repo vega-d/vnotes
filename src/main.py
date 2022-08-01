@@ -120,7 +120,7 @@ class Main(Gtk.ApplicationWindow):
             tab_name = filename
         else:
             tab_name = "New Note " + str(tab_number)
-            path = None
+            path = self.conf.get_default_folder()
 
         page = editor.Editor(self, tab_number=tab_number, text=text, filename=filename, path=path)
         page.set_border_width(1)

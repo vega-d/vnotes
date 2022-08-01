@@ -213,7 +213,8 @@ class Editor(Gtk.Box):
     def save(self, filename):
         if not self.saved:
             try:
-                success = fileframework.savebuffer(filename, self.textbuffer, folder=self.filename)
+                print(filename, self.textbuffer, self.path)
+                success = fileframework.savebuffer(filename, self.textbuffer, folder=self.path)
                 if success:
                     self.on_saved_change(True)
             except Exception as e:
