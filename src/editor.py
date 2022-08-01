@@ -115,7 +115,7 @@ class Editor(Gtk.Box):
         buffer = self.textbuffer.get_text(
             *self.textbuffer.get_bounds(),
             False)[:min(30, self.textbuffer.get_char_count())]
-        buffer = buffer.strip().lstrip("#").strip("_").strip("*")[:64]
+        buffer = buffer.replace("\n", " ").strip().lstrip("#").strip("_").strip("*")
 
         # here we figure out the default tab name
         if len(buffer) and self.parent_notebook.get_tab_label(self):
